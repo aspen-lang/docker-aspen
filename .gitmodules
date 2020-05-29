@@ -1,0 +1,4 @@
+[submodule "aspen"]
+	path = aspen
+	url = https://github.com/aspen-lang/aspen.git
+	branch = master
