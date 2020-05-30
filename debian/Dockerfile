@@ -23,29 +23,25 @@ RUN mkdir -p /aspen/aspen-runtime/src
 RUN mkdir -p /aspen/aspen-cli/src
 
 WORKDIR /aspen
-COPY aspen/Cargo.toml aspen/Cargo.lock aspen/
-COPY aspen-runtime/Cargo.toml aspen-runtime/Cargo.lock aspen-runtime/
-COPY aspen-cli/Cargo.toml aspen-cli/Cargo.lock aspen-cli/
 
-WORKDIR /aspen/aspen-runtime
-RUN touch src/lib.rs
+RUN touch aspen-runtime/src/lib.rs
+RUN touch aspen/src/lib.rs
+RUN echo "fn main() {}" > aspen-cli/src/main.rs
+
+COPY aspen/Cargo.toml aspen/
+COPY aspen-runtime/Cargo.toml aspen-runtime/
+COPY aspen-cli/Cargo.toml aspen-cli/
+COPY Cargo.toml Cargo.lock ./
+
 RUN cargo build --release
+
 RUN rm target/release/deps/libaspen_runtime-*
-
-WORKDIR /aspen/aspen
-RUN touch src/lib.rs
-RUN cargo build --release
 RUN rm target/release/deps/libaspen-*
-
-WORKDIR /aspen/aspen-cli
-RUN echo "fn main() {}" > src/main.rs
-RUN cargo build --release
 RUN rm target/release/deps/aspen-*
 
-WORKDIR /aspen
 COPY . .
 
-RUN make
+RUN cargo build --release
 
 WORKDIR /
 
@@ -56,11 +52,11 @@ RUN apt update && apt install -y \
   libz-dev
 
 COPY --from=builder \
-  /aspen/aspen-cli/target/release/aspen \
+  /aspen/target/release/aspen \
   /usr/bin/aspen
 
 COPY --from=builder \
-  /aspen/aspen-runtime/target/release/libaspen_runtime.a \
+  /aspen/target/release/libaspen_runtime.a \
   /usr/lib/libaspen_runtime.a
 
 ENTRYPOINT ["/usr/bin/aspen"]
